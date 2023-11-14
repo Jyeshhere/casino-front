@@ -4,14 +4,11 @@ import React from 'react';
 import { title } from "@/components/primitives";
 import {Card, CardHeader, CardBody, CardFooter, Divider, Link, Image} from "@nextui-org/react";
 import { InputNumber, Button, message, Table, Spin, Result, Tooltip, Radio, Tag, Popover, Avatar, Space } from 'antd';
+import { useTheme } from "next-themes";
 
 export default function PricingPage() {
-
-	const rulesContent = (
-		<div>
-		  <h3>Kikou</h3>
-		</div>
-	);
+	const { theme, setTheme } = useTheme();
+	console.log(theme);
 
 	return (
 		<Card className="max-w-[400px]">
@@ -23,28 +20,35 @@ export default function PricingPage() {
 			<Divider/>
 			<CardBody style={{textAlign: 'center'}}>
 				<Radio.Group
-					style={{ marginBottom: 16, width: '100%' }}
+					style={{ 
+						marginBottom: 16, width: '100%'					
+					}}
 				>
-					<Radio.Button value={1}>Rock <Avatar src="https://symbl-world.akamaized.net/i/webp/f2/0e29d778af528ff18585b3c4088835.webp" size={18}/></Radio.Button>
-					<Radio.Button value={2}>Paper <Avatar src="https://symbl-world.akamaized.net/i/webp/77/ec9b6d839eb7a9868c98b397842442.webp" size={18}/></Radio.Button>
-					<Radio.Button value={3}>Scissors <Avatar src="https://symbl-world.akamaized.net/i/webp/c4/aa8b2a5d6d7304241d56de9f82e3d9.webp" size={18}/></Radio.Button>
+					<Radio.Button value={1} style={{backgroundColor: theme === "light" ? "#FFFFFF" : "#3B3737"}}><p style={{color: theme === "light" ? "black" : "#FFFFFF"}}>Rock <Avatar src="https://symbl-world.akamaized.net/i/webp/f2/0e29d778af528ff18585b3c4088835.webp" size={18}/></p></Radio.Button>
+					<Radio.Button value={2} style={{backgroundColor: theme === "light" ? "#FFFFFF" : "#3B3737"}}><p style={{color: theme === "light" ? "black" : "#FFFFFF"}}>Paper <Avatar src="https://symbl-world.akamaized.net/i/webp/77/ec9b6d839eb7a9868c98b397842442.webp" size={18}/></p></Radio.Button>
+					<Radio.Button value={3} style={{backgroundColor: theme === "light" ? "#FFFFFF" : "#3B3737"}}><p style={{color: theme === "light" ? "black" : "#FFFFFF"}}>Scissors <Avatar src="https://symbl-world.akamaized.net/i/webp/c4/aa8b2a5d6d7304241d56de9f82e3d9.webp" size={18}/></p></Radio.Button>
 				</Radio.Group>
 				<InputNumber
-						placeholder="Amount"
-						inputMode="numeric"
-						style={{  }}
-						addonBefore={
-						<img src="https://nanswap.com/logo/XNO.svg" width='25px' style={{}}/>
-						}
-						min={0}
-						addonAfter={
+					style={{
+						backgroundColor: theme === "light" ? "#FFFFFF" : "#3B3737",
+						borderColor: theme === "light" ? "#FFFFFF" : "#3B3737",
+						color: theme === "light" ? "black" : "#FFFFFF",
+						borderRadius: '5px'
+					}}
+					placeholder="Amount"
+					inputMode="numeric"
+					addonBefore={
+						<Avatar src="https://nanswap.com/logo/XNO.svg" style={{ height: '80%' }} />
+					}
+					min={0}
+					addonAfter={
 						<Space>
-							<Button size='small' style={{}}>÷2</Button>
-							<Button size='small' style={{}}>×2</Button>
-							<Button size='small' style={{}}>Max</Button>
+						<Button size='small'><p style={{color: theme === "light" ? "black" : "#FFFFFF"}}>÷2</p></Button>
+						<Button size='small'><p style={{color: theme === "light" ? "black" : "#FFFFFF"}}>×2</p></Button>
+						<Button size='small'><p style={{color: theme === "light" ? "black" : "#FFFFFF"}}>Max</p></Button>
 						</Space>
-						}
-					/>
+					}
+				/>
 			</CardBody>
 			<Divider/>
 			<CardFooter>
