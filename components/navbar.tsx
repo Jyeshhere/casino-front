@@ -1,3 +1,6 @@
+'use client'; // If used in Pages Router, is no need to add "use client"
+
+import React from 'react';
 import {
 	Navbar as NextUINavbar,
 	NavbarContent,
@@ -34,17 +37,36 @@ import {
 import { Logo } from "@/components/icons";
 
 export const Navbar = () => {
+	const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+	const menuItems = [
+		"Profile",
+		"Dashboard",
+		"Activity",
+		"Analytics",
+		"System",
+		"Deployments",
+		"My Settings",
+		"Team Settings",
+		"Help & Feedback",
+		"Log Out",
+	];
 
 	return (
-		<NextUINavbar maxWidth="xl" position="sticky">
+		<NextUINavbar maxWidth="xl" position="sticky" isBordered onMenuOpenChange={setIsMenuOpen}>
+			<NavbarContent className="sm:hidden" justify="start">
+				<NavbarMenuToggle
+					aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+					className="sm:hidden"
+				/>
+			</NavbarContent>
 			<NavbarContent className="basis-1/5 sm:basis-full" justify="start">
 				<NavbarBrand as="li" className="gap-3 max-w-fit">
-					<NextLink className="flex justify-start items-center gap-1" href="/">
+					<NextLink className="flex justify-start items-center gap-1 hidden sm:flex gap-2" href="/">
 						<img src="/logo.png" alt="Logo" width={'30px'}/>
-						<p className="font-bold text-inherit hidden sm:flex gap-2">NanBet</p>
+						<p className="font-bold text-inherit">NanBet</p>
 					</NextLink>
 				</NavbarBrand>
-				{/* <ul className="hidden lg:flex gap-4 justify-start ml-2">
+				<ul className="hidden lg:flex gap-4 justify-start ml-2">
 					{siteConfig.navItems.map((item) => (
 						<NavbarItem key={item.href}>
 							<NextLink
@@ -59,7 +81,7 @@ export const Navbar = () => {
 							</NextLink>
 						</NavbarItem>
 					))}
-				</ul> */}
+				</ul>
 			</NavbarContent>
 
 			<NavbarContent
@@ -94,6 +116,19 @@ export const Navbar = () => {
 					</Button>
 				</NavbarItem>
 			</NavbarContent>
+			<NavbarMenu>
+				{siteConfig.navItems.map((item) => (
+				<NavbarMenuItem key={item.href}>
+					<Link
+					className="w-full"
+					href={item.href}
+					size="lg"
+					>
+					{item.label}
+					</Link>
+				</NavbarMenuItem>
+				))}
+			</NavbarMenu>
 		</NextUINavbar>
 	);
 };
