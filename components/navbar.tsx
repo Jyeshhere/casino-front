@@ -16,10 +16,21 @@ import { Link } from "@nextui-org/link";
 import { Input } from "@nextui-org/input";
 import { FaUserAstronaut } from "react-icons/fa";
 import { HiOutlineLogin } from "react-icons/hi";
+import { BiLogOutCircle } from "react-icons/bi";
+import { RiAccountCircleLine } from "react-icons/ri";
+import { VscSettings } from "react-icons/vsc";
+import { SlWallet } from "react-icons/sl";
+import { LuCopy } from "react-icons/lu";
 import { useCookies } from 'react-cookie';
 import Cookies from 'js-cookie';
 import {DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar} from "@nextui-org/react";
 import axios from 'axios';
+import blake from 'blakejs';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+
+import { Select, Typography, Avatar as AntAvatar, message, Popconfirm, Button as AntButton, QRCode } from 'antd';
+
+import io from 'socket.io-client';
 
 import { link as linkStyles } from "@nextui-org/theme";
 
@@ -29,16 +40,44 @@ import clsx from "clsx";
 
 import { ThemeSwitch } from "@/components/theme-switch";
 
-import { Logo } from "@/components/icons";
+import { GithubIcon, Logo } from "@/components/icons";
+
+const socket = io(`${siteConfig.apiUrl}`);
+const { Text } = Typography;
+
+const info = (customMessage: string) => {
+	message.info(`${customMessage}`);
+  };
+  
+message.config({
+	duration: 2,
+	maxCount: 1, // Spécifiez le nombre maximal de messages à afficher
+	rtl: true,
+});
 
 export const Navbar = () => {
 	const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 	
-	const [cookies] = useCookies(['token']);
+	const [cookies, setCookie, removeCookie] = useCookies(['token', 'currency']);
     const isAuthenticated = !!cookies.token;
 
 	const [email, setEmail] = useState('');
   	const [avatar, setAvatar] = useState('');
+
+	const [balanceData, setBalanceData] = useState(null);
+	const [miniDeposit, setMiniDeposit] = useState({});
+	const [deposit, setDeposit] = useState({});
+
+	// Liste de toutes les cryptos prisent en charge, c'est utilisé pour récupérer les logo à partir du nom de la crypto
+	const options = [
+		{ value: "xno", label: 'XNO', image: 'https://xno.nano.org/images/xno-badge-blue.svg' },
+		{ value: "ban", label: 'BAN', image: 'https://banano.cc/presskit/banano-icon.svg' },
+		{ value: "ana", label: 'ANA', image: 'https://nanswap.com/logo/ANA.png' },
+		{ value: "xdg", label: 'XDG', image: 'https://dogenano.io/static/media/XDG.00462477.png' },
+	];
+
+	// ça, c'est le genre de truc inutile mais que je laisse par flemme 
+	const iconClasses = "text-xl text-default-500 pointer-events-none flex-shrink-0";
 
 	// Requête axios pour récupérer des informations du user...
 	useEffect(() => {
@@ -57,6 +96,55 @@ export const Navbar = () => {
 			console.error('Error fetching email:', error);
 		  })
 	}, [isAuthenticated, cookies.token]);
+
+	// Envoie d'une demande d'information sur la balance via le socket.io
+	useEffect(() => {
+		const fetchData = async () => {
+		  if (isAuthenticated && cookies.token) {
+			socket.emit('action', { action: 'balances', token: cookies.token });
+		  }
+		};
+	
+		fetchData();
+	  }, [isAuthenticated, cookies.token]);
+
+	// Récupérer l'adresse de dépot
+	useEffect(() => {
+		axios.get(`${siteConfig.apiUrl}/user/deposit`, {
+		  headers: {
+			auth: cookies.token,
+		  },
+		})
+		  .then(response => {
+			if (response.data) {
+			  setDeposit(response.data);
+			  setMiniDeposit({ XNO: response.data.XNO.substring(0, 20), BAN: response.data.BAN.substring(0, 20), ANA: response.data.ANA.substring(0, 20), XDG: response.data.XDG.substring(0, 20) })
+			}
+		  })
+		  .catch(error => {
+			console.error('Error fetching login history:', error);
+		  });
+	  }, []);
+
+	// Fonction de deconnexion (il faut tous faire pour que l'utilisateur ne parte pas du site, il faut qu'il perde de l'argent 😂... Non plus sérieusement il est 10h59)
+	const handleLogout = () => {
+		removeCookie('token');
+	};
+
+	// --------------------- START SOCKET -------------------------
+	socket.on('balances', (data) => {
+		const emailHash = blake.blake2bHex(email);
+		if (data.email) {
+		  if (data.email === emailHash) {
+			const withoutEmail = { ...data };
+			delete withoutEmail.email;
+			setBalanceData(withoutEmail);
+		  }
+		} else {
+		  setBalanceData(data);
+		}
+	});
+	// --------------------- END SOCKET -------------------------
 
 	return (
 		<>
@@ -92,6 +180,52 @@ export const Navbar = () => {
 					</ul>
 				</NavbarContent>
 
+				<NavbarContent justify="center">
+				<div style={{ display: 'flex', alignItems: 'center' }}>
+					<Select
+						defaultValue={cookies.currency || "xno"}
+						style={{
+						width: 120,
+						}}
+						options={options.map(option => ({
+						value: option.value,
+						label: (
+							<span>
+							<AntAvatar src={option.image} size="small"/>
+							<Text strong>{balanceData ? ` | ${balanceData[option.value]}` : 'Chargement...'}</Text>
+							</span>
+						),
+						}))}
+						onChange={(value: any) => setCookie('currency', value, { path: '/' })}
+					/>
+					<Popconfirm
+                    placement="bottom"
+                    title={`Deposit ${cookies.currency.toUpperCase() || "XNO"}`}
+                    description={
+						<>
+						  <div style={{ display: 'flex', alignItems: 'center' }}>
+							<span>{miniDeposit[cookies.currency.toUpperCase()]}</span>
+							<CopyToClipboard
+							  text={deposit[cookies.currency.toUpperCase() || 'XNO']}
+							  onCopy={() => info('Adresse copiée dans le presse-papiers !')}
+							>
+							  <LuCopy style={{ cursor: 'pointer', marginLeft: '5px' }} />
+							</CopyToClipboard>
+						  </div>
+						  <QRCode value={deposit[cookies.currency.toUpperCase() || 'XNO'] || '-'} className="hidden sm:flex" />
+						</>
+					}
+                  >
+                  <AntButton
+                    icon={<SlWallet />}
+                    type="primary"
+                    ghost
+                    style={{ marginLeft: '5px', background: 'transparent', border: 'none' }}
+                  />
+                  </Popconfirm>
+				</div>
+				</NavbarContent>
+
 				<NavbarContent
 					justify="end"
 				>
@@ -114,19 +248,34 @@ export const Navbar = () => {
 									src={avatar}
 									/>
 								</DropdownTrigger>
-								<DropdownMenu aria-label="Profile Actions" variant="flat">
+								<DropdownMenu aria-label="Profile Actions" variant="faded">
 									<DropdownItem key="profile" className="h-14 gap-2">
 									<p className="font-semibold">Signed in as</p>
 									<p className="font-semibold">{email}</p>
 									</DropdownItem>
-									<DropdownItem key="settings">My Profil</DropdownItem>
-									<DropdownItem key="team_settings">Settings</DropdownItem>
-									<DropdownItem key="analytics">Analytics</DropdownItem>
-									<DropdownItem key="system">System</DropdownItem>
-									<DropdownItem key="configurations">Configurations</DropdownItem>
-									<DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
-									<DropdownItem key="logout" color="danger">
-									Log Out
+									<DropdownItem
+									key="new"
+									startContent={<RiAccountCircleLine className={iconClasses} />}
+									description="View your information"
+									>
+									Account
+									</DropdownItem>
+									<DropdownItem
+									key="copy"
+									startContent={<VscSettings className={iconClasses} />}
+									description="Change your settings"
+									>
+									Settings
+									</DropdownItem>
+									<DropdownItem
+									key="delete"
+									className="text-danger"
+									color="danger"
+									startContent={<BiLogOutCircle className={iconClasses} />}
+									description="You are already leaving 🥲"
+									onClick={handleLogout}
+									>
+									Logout
 									</DropdownItem>
 								</DropdownMenu>
 								</Dropdown>
