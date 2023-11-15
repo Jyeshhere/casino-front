@@ -2,12 +2,18 @@
 
 import React from 'react';
 import { title } from "@/components/primitives";
-import {Card, CardHeader, CardBody, CardFooter, Divider, Link, Image} from "@nextui-org/react";
+import {Card, CardHeader, CardBody, CardFooter, Divider, Link, Image, Button as NextButton} from "@nextui-org/react";
 import { InputNumber, Button, message, Table, Spin, Result, Tooltip, Radio, Tag, Popover, Avatar, Space } from 'antd';
 import { useTheme } from "next-themes";
+import { useCookies } from 'react-cookie';
+import { FaUserAstronaut } from "react-icons/fa";
+import { HiOutlineLogin } from "react-icons/hi";
+import { siteConfig } from "@/config/site";
 
 export default function PricingPage() {
 	const { theme, setTheme } = useTheme();
+	const [cookies, setCookie, removeCookie] = useCookies(['token', 'currency']);
+	const isAuthenticated = !!cookies.token;
 	console.log(theme);
 
 	return (
@@ -51,14 +57,36 @@ export default function PricingPage() {
 				/>
 			</CardBody>
 			<Divider/>
-			<CardFooter>
-				<Link
-				isExternal
-				showAnchorIcon
-				href="https://github.com/nextui-org/nextui"
-				>
-				Visit source code on GitHub.
-				</Link>
+			<CardFooter style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+				{ isAuthenticated ? (
+					<NextButton radius="full" className="bg-gradient-to-tr from-blue-500 to-yellow-500 text-white shadow-lg">
+						Play
+					</NextButton>
+				) : (
+
+					<><NextButton
+							isExternal
+							as={Link}
+							className="text-sm font-normal text-default-600 bg-default-100"
+							href={siteConfig.links.sponsor}
+							startContent={<FaUserAstronaut className="text-danger" style={{ color: 'blue' }} />}
+							// variant="shadow"
+							color="primary"
+						>
+							Signup
+						</NextButton>
+						<NextButton
+							as={Link}
+							className="text-sm font-normal text-default-600 bg-default-100"
+							href="/login"
+							startContent={<HiOutlineLogin className="text-danger" style={{ color: 'blue' }} />}
+							// variant="shadow"
+							color="primary"
+							style={{marginLeft: '10px'}}
+						>
+								Login
+						</NextButton></>
+				)}
 			</CardFooter>
 			</Card>
 	);

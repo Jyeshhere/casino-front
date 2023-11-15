@@ -180,51 +180,52 @@ export const Navbar = () => {
 					</ul>
 				</NavbarContent>
 
-				<NavbarContent justify="center">
-				<div style={{ display: 'flex', alignItems: 'center' }}>
-					<Select
-						defaultValue={cookies.currency || "xno"}
-						style={{
-						width: 120,
-						}}
-						options={options.map(option => ({
-						value: option.value,
-						label: (
-							<span>
-							<AntAvatar src={option.image} size="small"/>
-							<Text strong>{balanceData ? ` | ${balanceData[option.value]}` : 'Chargement...'}</Text>
-							</span>
-						),
-						}))}
-						onChange={(value: any) => setCookie('currency', value, { path: '/' })}
-					/>
-					<Popconfirm
-                    placement="bottom"
-                    title={`Deposit ${cookies.currency.toUpperCase() || "XNO"}`}
-                    description={
-						<>
-						  <div style={{ display: 'flex', alignItems: 'center' }}>
-							<span>{miniDeposit[cookies.currency.toUpperCase()]}</span>
-							<CopyToClipboard
-							  text={deposit[cookies.currency.toUpperCase() || 'XNO']}
-							  onCopy={() => info('Adresse copiée dans le presse-papiers !')}
-							>
-							  <LuCopy style={{ cursor: 'pointer', marginLeft: '5px' }} />
-							</CopyToClipboard>
-						  </div>
-						  <QRCode value={deposit[cookies.currency.toUpperCase() || 'XNO'] || '-'} className="hidden sm:flex" />
-						</>
-					}
-                  >
-                  <AntButton
-                    icon={<SlWallet />}
-                    type="primary"
-                    ghost
-                    style={{ marginLeft: '5px', background: 'transparent', border: 'none' }}
-                  />
-                  </Popconfirm>
-				</div>
-				</NavbarContent>
+			    {isAuthenticated ? (
+					<NavbarContent justify="center">
+						<div style={{ display: 'flex', alignItems: 'center' }}>
+						<Select
+							defaultValue={cookies.currency || "xno"}
+							style={{ width: 120 }}
+							options={options.map((option) => ({
+							value: option.value,
+							label: (
+								<span>
+								<AntAvatar src={option.image} size="small" />
+								<Text strong>{balanceData ? ` | ${balanceData[option.value]}` : 'Chargement...'}</Text>
+								</span>
+							),
+							}))}
+							onChange={(value: any) => setCookie('currency', value, { path: '/' })}
+						/>
+						<Popconfirm
+							placement="bottom"
+							title={`Deposit ${cookies.currency?.toUpperCase() || "XNO"}`}
+							description={
+							<>
+								<div style={{ display: 'flex', alignItems: 'center' }}>
+								<span>{miniDeposit[cookies.currency?.toUpperCase()]}</span>
+								<CopyToClipboard
+									text={deposit[cookies.currency?.toUpperCase() || 'XNO']}
+									onCopy={() => info('Adresse copiée dans le presse-papiers !')}
+								>
+									<LuCopy style={{ cursor: 'pointer', marginLeft: '5px' }} />
+								</CopyToClipboard>
+								</div>
+								<QRCode value={deposit[cookies.currency?.toUpperCase() || 'XNO'] || '-'} className="hidden sm:flex" />
+							</>
+							}
+						>
+							<AntButton
+							icon={<SlWallet />}
+							type="primary"
+							ghost
+							style={{ marginLeft: '5px', background: 'transparent', border: 'none' }}
+							/>
+						</Popconfirm>
+						</div>
+					</NavbarContent>
+				) : null}
+
 
 				<NavbarContent
 					justify="end"
@@ -242,7 +243,7 @@ export const Navbar = () => {
 									isBordered
 									as="button"
 									className="transition-transform"
-									color="secondary"
+									color="primary"
 									name="Jason Hughes"
 									size="sm"
 									src={avatar}
@@ -285,12 +286,12 @@ export const Navbar = () => {
 						<>
 							<NavbarItem>
 								<Button
-						isExternal
 									as={Link}
 									className="text-sm font-normal text-default-600 bg-default-100"
-									href={siteConfig.links.sponsor}
-									startContent={<FaUserAstronaut className="text-danger" />}
+									href="/signup"
+									startContent={<FaUserAstronaut className="text-danger" style={{ color: 'blue' }}/>}
 									variant="shadow"
+									color="primary"
 								>
 									Signup
 								</Button>
@@ -301,8 +302,9 @@ export const Navbar = () => {
 									as={Link}
 									className="text-sm font-normal text-default-600 bg-default-100"
 									href="/login"
-									startContent={<HiOutlineLogin className="text-danger" />}
+									startContent={<HiOutlineLogin className="text-danger" style={{ color: 'blue' }} />}
 									variant="shadow"
+									color="primary"
 								>
 									Login
 								</Button>
