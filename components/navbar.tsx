@@ -59,6 +59,7 @@ export const Navbar = () => {
 	const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 	
 	const [cookies, setCookie, removeCookie] = useCookies(['token', 'currency']);
+	
     const isAuthenticated = !!cookies.token;
 
 	const [email, setEmail] = useState('');
@@ -203,16 +204,16 @@ export const Navbar = () => {
 							description={
 							<>
 								<div style={{ display: 'flex', alignItems: 'center' }}>
-								<span>{miniDeposit[cookies.currency?.toUpperCase()]}</span>
-								<CopyToClipboard
-									text={deposit[cookies.currency?.toUpperCase() || 'XNO']}
+								  <span>{miniDeposit[cookies?.currency?.toUpperCase()]}</span>
+								  <CopyToClipboard
+									text={deposit[cookies?.currency?.toUpperCase() || 'XNO']}
 									onCopy={() => info('Adresse copiée dans le presse-papiers !')}
-								>
+								  >
 									<LuCopy style={{ cursor: 'pointer', marginLeft: '5px' }} />
-								</CopyToClipboard>
+								  </CopyToClipboard>
 								</div>
-								<QRCode value={deposit[cookies.currency?.toUpperCase() || 'XNO'] || '-'} className="hidden sm:flex" />
-							</>
+								<QRCode value={deposit[cookies?.currency?.toUpperCase() || 'XNO'] || '-'} className="hidden sm:flex" />
+							  </>
 							}
 						>
 							<AntButton
