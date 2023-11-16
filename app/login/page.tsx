@@ -111,7 +111,7 @@ export default function PricingPage() {
                   >
                     Remember me
                   </Checkbox>
-                  <Link color="primary" href="#" size="sm">
+                  <Link color="primary" href="/forgot" size="sm">
                     Forgot ?
                   </Link>
                 </div>

@@ -47,7 +47,7 @@ const { Text } = Typography;
 
 const info = (customMessage: string) => {
 	message.info(`${customMessage}`);
-  };
+};
   
 message.config({
 	duration: 2,
@@ -68,6 +68,8 @@ export const Navbar = () => {
 	const [balanceData, setBalanceData] = useState(null);
 	const [miniDeposit, setMiniDeposit] = useState({});
 	const [deposit, setDeposit] = useState({});
+	const [latestDeposit, setLatestDeposit] = useState('');
+	const [online, setOnline] = useState(1);
 
 	// Liste de toutes les cryptos prisent en charge, c'est utilisé pour récupérer les logo à partir du nom de la crypto
 	const options = [
@@ -134,6 +136,7 @@ export const Navbar = () => {
 
 	// --------------------- START SOCKET -------------------------
 	socket.on('balances', (data) => {
+		console.log(data);
 		const emailHash = blake.blake2bHex(email);
 		if (data.email) {
 		  if (data.email === emailHash) {
@@ -143,6 +146,22 @@ export const Navbar = () => {
 		  }
 		} else {
 		  setBalanceData(data);
+		}
+	});
+
+	socket.on('newDeposit', (data) => {
+		const emailHash = blake.blake2bHex(email);
+		if (data.email && data.email === emailHash && latestDeposit !== data.hash) {
+			info(`New deposit: ${data.amount} ${data.ticket}`);
+			setLatestDeposit(data.hash);
+		}
+	});
+
+	socket.on('clientCount', (data) => {
+		if ((data - 6)/2 > 0) {
+		  setOnline((data - 6)/2);
+		} else {
+		  setOnline(data/2-0.5);
 		}
 	});
 	// --------------------- END SOCKET -------------------------

@@ -2,7 +2,7 @@ export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
 	name: "NanBet",
-	apiUrl: "https://api.nanbet.io",
+	apiUrl: "http://localhost:2001",
 	description: "The best casino of the world.",
 	navItems: [
 		{
