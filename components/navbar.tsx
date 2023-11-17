@@ -23,7 +23,7 @@ import { SlWallet } from "react-icons/sl";
 import { LuCopy } from "react-icons/lu";
 import { useCookies } from 'react-cookie';
 import Cookies from 'js-cookie';
-import {DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar, Image} from "@nextui-org/react";
+import {DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar, Image, Select as NextSelect, SelectItem as NextSelectItem} from "@nextui-org/react";
 import axios from 'axios';
 import blake from 'blakejs';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -204,20 +204,21 @@ export const Navbar = () => {
 			    {isAuthenticated ? (
 					<NavbarContent justify="center">
 						<div style={{ display: 'flex', alignItems: 'center' }}>
-						<Select
-							defaultValue={cookies.currency || "xno"}
+						<NextSelect
+							value={cookies.currency || "xno"}
 							style={{ width: 120 }}
-							options={options.map((option) => ({
-							value: option.value,
-							label: (
-								<span>
-								<AntAvatar src={option.image} size="small" />
-								<Text strong>{balanceData ? ` | ${balanceData[option.value]}` : 'Chargement...'}</Text>
-								</span>
-							),
-							}))}
 							onChange={(value: any) => setCookie('currency', value, { path: '/' })}
-						/>
+							defaultSelectedKeys={["XNO"]}
+						>
+							{options.map((option) => (
+								<NextSelectItem key={option.value} value={option.value}>
+								<span>
+									<Avatar src={option.image}/>
+									<p>{balanceData ? ` | ${balanceData[option.value]}` : 'Chargement...'}</p>
+								</span>
+								</NextSelectItem>
+							))}
+						</NextSelect>
 						<Popconfirm
 							placement="bottom"
 							title={`Deposit ${cookies.currency?.toUpperCase() || "XNO"}`}
