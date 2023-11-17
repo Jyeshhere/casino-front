@@ -42,7 +42,7 @@ export default function Page({ params }: { params: { slug: string } }) {
 			setLoading(false); // Définissez loading sur false après la fin de la requête
 			setCaca(true);
 		  });
-	  }, []); // Assurez-vous que 'data' et 'caca' sont inclus dans les dépendances du useEffect
+	  }, [data, verificationStatus, caca]); // Assurez-vous que 'data' et 'caca' sont inclus dans les dépendances du useEffect
 	  
 	
 	  useEffect(() => {

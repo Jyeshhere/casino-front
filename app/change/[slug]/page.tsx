@@ -77,9 +77,9 @@ export default function Page({ params }: { params: { slug: string } }) {
 						status="success"
 						title={<div style={{ color: theme === "light" ? "black" : "white" }}>The password was changed !</div>}
 						extra={[
-							<Link href="/login">
+							<Link key="login-link" href="/login">
 								<Button color="primary">
-									Back Login
+									Back to Login
 								</Button>
 							</Link>
 						]}
@@ -89,9 +89,9 @@ export default function Page({ params }: { params: { slug: string } }) {
 						status="warning"
 						title={<div style={{ color: theme === "light" ? "black" : "white" }}>ERRROOOOOR !</div>}
 						extra={[
-							<Link href="/login">
+							<Link key="login-link" href="/login">
 								<Button color="primary">
-									Back Login
+									Back to Login
 								</Button>
 							</Link>
 						]}

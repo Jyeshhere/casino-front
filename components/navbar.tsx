@@ -23,7 +23,7 @@ import { SlWallet } from "react-icons/sl";
 import { LuCopy } from "react-icons/lu";
 import { useCookies } from 'react-cookie';
 import Cookies from 'js-cookie';
-import {DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar} from "@nextui-org/react";
+import {DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar, Image} from "@nextui-org/react";
 import axios from 'axios';
 import blake from 'blakejs';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -66,10 +66,11 @@ export const Navbar = () => {
   	const [avatar, setAvatar] = useState('');
 
 	const [balanceData, setBalanceData] = useState(null);
-	const [miniDeposit, setMiniDeposit] = useState({});
-	const [deposit, setDeposit] = useState({});
+	const [miniDeposit, setMiniDeposit] = useState<{ [key: string]: string }>({});
+	const [deposit, setDeposit] = useState<{ [key: string]: string }>({});
 	const [latestDeposit, setLatestDeposit] = useState('');
 	const [online, setOnline] = useState(1);
+	
 
 	// Liste de toutes les cryptos prisent en charge, c'est utilisé pour récupérer les logo à partir du nom de la crypto
 	const options = [
@@ -127,7 +128,7 @@ export const Navbar = () => {
 		  .catch(error => {
 			console.error('Error fetching login history:', error);
 		  });
-	  }, []);
+	  }, [cookies]);
 
 	// Fonction de deconnexion (il faut tous faire pour que l'utilisateur ne parte pas du site, il faut qu'il perde de l'argent 😂... Non plus sérieusement il est 10h59)
 	const handleLogout = () => {
@@ -178,7 +179,7 @@ export const Navbar = () => {
 				<NavbarContent className="basis-1/5 sm:basis-full" justify="start">
 					<NavbarBrand as="li" className="gap-3 max-w-fit">
 						<NextLink className="flex justify-start items-center gap-1 hidden sm:flex gap-2" href="/">
-							<img src="/logo.png" alt="Logo" width={'30px'}/>
+							<Image src="/logo.png" alt="Logo" width={'30px'}/>
 							<p className="font-bold text-inherit">NanBet</p>
 						</NextLink>
 					</NavbarBrand>
