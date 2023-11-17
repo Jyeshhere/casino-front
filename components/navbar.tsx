@@ -205,15 +205,20 @@ export const Navbar = () => {
 					<NavbarContent justify="center">
 						<div style={{ display: 'flex', alignItems: 'center' }}>
 						<NextSelect
-							value={cookies.currency || "xno"}
+							value={cookies.currency || "XNO"} // Use "XNO" as the default if cookies.currency is not present
 							style={{ width: 120 }}
 							onChange={(value: any) => setCookie('currency', value, { path: '/' })}
-							defaultSelectedKeys={["XNO"]}
+							startContent={<Image src={options[cookies.currency]?.image} />}
 						>
 							{options.map((option) => (
-								<NextSelectItem key={option.value} value={option.value}>
+								<NextSelectItem 
+								key={option.value} 
+								value={option.value}
+								startContent={
+									<Avatar alt="Switzerland" className="w-6 h-6" src={option.image} />
+								}
+								>
 								<span>
-									<Avatar src={option.image}/>
 									<p>{balanceData ? ` | ${balanceData[option.value]}` : 'Chargement...'}</p>
 								</span>
 								</NextSelectItem>
