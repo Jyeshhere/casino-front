@@ -28,7 +28,7 @@ import axios from 'axios';
 import blake from 'blakejs';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
-import { Select, Typography, Avatar as AntAvatar, message, Popconfirm, Button as AntButton, QRCode } from 'antd';
+import { Select, Typography, Avatar as AntAvatar, message, Popconfirm, Button as AntButton, QRCode, ConfigProvider } from 'antd';
 
 import io from 'socket.io-client';
 
@@ -204,26 +204,25 @@ export const Navbar = () => {
 			    {isAuthenticated ? (
 					<NavbarContent justify="center">
 						<div style={{ display: 'flex', alignItems: 'center' }}>
-						<NextSelect
-							value={cookies.currency || "XNO"} // Use "XNO" as the default if cookies.currency is not present
-							style={{ width: 120 }}
-							onChange={(value: any) => setCookie('currency', value, { path: '/' })}
-							startContent={<Image src={options[cookies.currency]?.image} />}
+						<ConfigProvider
+							
 						>
-							{options.map((option) => (
-								<NextSelectItem 
-								key={option.value} 
-								value={option.value}
-								startContent={
-									<Avatar alt="Switzerland" className="w-6 h-6" src={option.image} />
-								}
-								>
+						<Select
+							defaultValue={cookies.currency || "xno"}
+							style={{ width: 120 }}
+							options={options.map((option) => ({
+							value: option.value,
+							label: (
 								<span>
-									<p>{balanceData ? ` | ${balanceData[option.value]}` : 'Chargement...'}</p>
+								<AntAvatar src={option.image} size="small" />
+								<Text strong>{balanceData ? ` | ${balanceData[option.value]}` : 'Chargement...'}</Text>
 								</span>
-								</NextSelectItem>
-							))}
-						</NextSelect>
+							),
+							}))}
+							onChange={(value: any) => setCookie('currency', value, { path: '/' })}
+						/>
+						</ConfigProvider>
+
 						<Popconfirm
 							placement="bottom"
 							title={`Deposit ${cookies.currency?.toUpperCase() || "XNO"}`}

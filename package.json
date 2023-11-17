@@ -46,10 +46,12 @@
     "socket.io-client": "^4.7.2",
     "tailwind-variants": "^0.1.18",
     "tailwindcss": "3.3.5",
-    "typescript": "5.0.4"
+    "typescript": "5.0.4",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/js-cookie": "^3.0.6",
-    "@types/react-copy-to-clipboard": "^5.0.7"
+    "@types/react-copy-to-clipboard": "^5.0.7",
+    "@types/uuid": "^9.0.7"
   }
 }
