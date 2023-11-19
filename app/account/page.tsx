@@ -10,8 +10,15 @@ import { Row, Col, Statistic, Card as AntCard, Typography, Button as AntButton }
 import { StickyOffsets } from 'rc-table/lib/interface';
 import { FaMoneyBillWave, FaSeedling } from "react-icons/fa";
 import { MdOutlineTimelapse } from "react-icons/md";
-import { FaPastafarianism, FaDice } from "react-icons/fa";
+import { FaPastafarianism, FaDice, FaEye, FaEdit } from "react-icons/fa";
 import { useTheme } from "next-themes";
+import TimeAgo from 'javascript-time-ago'
+import { CiCircleCheck } from "react-icons/ci";
+import { GrCloudComputer } from "react-icons/gr";
+import ReactTimeAgo from 'react-time-ago'
+
+import en from 'javascript-time-ago/locale/en.json'
+TimeAgo.addDefaultLocale(en)
 
 const options = [
 	{ value: "xno", label: 'XNO', logo: 'https://xno.nano.org/images/xno-badge-blue.svg' },
@@ -39,6 +46,8 @@ export default function BlogPage() {
 	const [seedHash, setSeedHash] = useState<string | null>(null);
     const { theme, setTheme } = useTheme();
 	const [latestSeed, setLatestSeed] = useState<LatestSeed | null>(null);
+	const [loginHistoryData, setLoginHistoryData] = useState<historysData[]>([]);
+	const [depositData, setDepositData] = useState<historysData[]>([]);
 
 	const statusColorMap: Record<string, ChipProps["color"]>  = {
 		win: "success",
@@ -70,7 +79,7 @@ export default function BlogPage() {
 		  case "amount":
 			return (
 				<Chip className="capitalize" color={statusColorMap[user.status]} size="sm" variant="flat">
-					{String(user.amount).substring(0, 15)}
+					{String(user.amount).substring(0, 7)}
 				</Chip>
 			);
 		  case "currency":
@@ -86,46 +95,92 @@ export default function BlogPage() {
 			} else {
 				return user.currency;
 			}
-		  case "actions":
-			return (
-			  <div className="relative flex items-center gap-2">
-				<Tooltip content="Details">
-				  <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-					<SmileOutlined />
-				  </span>
-				</Tooltip>
-				<Tooltip content="Edit user">
-				  <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-					<SmileOutlined />
-				  </span>
-				</Tooltip>
-				<Tooltip color="danger" content="Delete user">
-				  <span className="text-lg text-danger cursor-pointer active:opacity-50">
-					<SmileOutlined />
-				  </span>
-				</Tooltip>
-			  </div>
-			);
+			case "actions":
+				return (
+				  <div className="relative flex items-center gap-2">
+					<Tooltip content="Check validity">
+					  <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+						<CiCircleCheck />
+					  </span>
+					</Tooltip>
+				  </div>
+				);
+			case "ip":
+				return (
+					<Chip
+						startContent={<GrCloudComputer size={18} />}
+						variant="faded"
+						color="success"
+					>
+						{user.ip}
+					</Chip>
+				);
+			case "date":
+				return (
+					<ReactTimeAgo date={user.date}/>
+				);
+			case "explorer":
+				const url = {xno: "https://www.nanolooker.com/block/", ban: "https://creeper.banano.cc/hash/", xdg: "https://explorer.dogenano.io/block/", ana: "https://ananault.lightcord.org/transaction/"}
+				
+				return (
+					<Link href={`${url[user.currency]}${user.hashTransac}`}>Here</Link>
+				);
 		  default:
 			return cellValue;
 		}
 	  }, [statusColorMap]);
 
 	const [page, setPage] = React.useState(1);
+	const [pageLogin, setPageLogin] = React.useState(1);
+	const [pageDeposit, setPageDeposit] = React.useState(1);
   	const rowsPerPage = 10;
 
-	  const pages = Math.ceil(historyData.length / rowsPerPage);
+	const pages = Math.ceil(historyData.length / rowsPerPage);
+	const pagesLogin = Math.ceil(loginHistoryData.length / rowsPerPage);
+	const pagesDeposit = Math.ceil(loginHistoryData.length / rowsPerPage);
 
-	  const items = React.useMemo(() => {
+	const items = React.useMemo(() => {
 		const start = (page - 1) * rowsPerPage;
 		const end = start + rowsPerPage;
 	
 		return historyData.slice(start, end);
 	}, [page, historyData]);
 
+	const itemsLogin = React.useMemo(() => {
+		const start = (pageLogin - 1) * rowsPerPage;
+		const end = start + rowsPerPage;
+	
+		return loginHistoryData.slice(start, end);
+	}, [pageLogin, loginHistoryData]);
+
+	const itemsDeposit = React.useMemo(() => {
+		const start = (pageDeposit - 1) * rowsPerPage;
+		const end = start + rowsPerPage;
+	
+		return depositData.slice(start, end);
+	}, [pageDeposit, depositData]);
+
 	const sortLatestBets = (bets: any[]) => {
 		return bets.sort((a: { id: number; }, b: { id: number; }) => b.id - a.id);
 	};
+
+	useEffect(() => {
+		axios.get(`${siteConfig.apiUrl}/user/deposit_history`, {
+		  headers: {
+			auth: cookies.token
+		  }
+		})
+		.then(response => {
+		  if (response.data) {
+			// Assurez-vous que response.data est un tableau, sinon encapsulez-le dans un tableau
+			const depositDataArray = Array.isArray(response.data) ? response.data : [response.data];
+			setDepositData(depositDataArray);
+		  }
+		})
+		.catch(error => {
+		  console.error('Error fetching email:', error);
+		});
+	  }, []);
 
 	useEffect(() => {
 		axios.get(`${siteConfig.apiUrl}/user/latest_seed`, {
@@ -217,6 +272,25 @@ export default function BlogPage() {
 			console.error('Error fetching history:', error);
 		  });
 	  }, []);
+
+	useEffect(() => {
+		// Récupérer les données de l'historique de connexion
+		axios.get(`${siteConfig.apiUrl}/user/login_history`, {
+			headers: {
+			  auth: cookies.token,
+			},
+		  })
+			.then(response => {
+			  if (response.data && Array.isArray(response.data)) {
+				// Tri du tableau par ID du plus grand au plus petit
+				const sortedData = response.data.sort((a, b) => b.id - a.id);
+				setLoginHistoryData(sortedData);
+			  }
+			})
+			.catch(error => {
+			  console.error('Error fetching login history:', error);
+			});
+	}, []);
 
 	useEffect(() => {
 		axios.get(`${siteConfig.apiUrl}/user/actual_seed`, {
@@ -399,6 +473,7 @@ export default function BlogPage() {
 								<TableColumn key="game">Game</TableColumn>
 								<TableColumn key="amount">Amount</TableColumn>
 								<TableColumn key="currency">Currency</TableColumn>
+								<TableColumn key="actions">Action</TableColumn>
 							</TableHeader>
 							<TableBody items={items}>
 								{(item) => (
@@ -414,10 +489,83 @@ export default function BlogPage() {
 						title={
 							<div className="flex items-center space-x-2">
 							<FaSeedling/>
-							<span>Seed</span>
+							<span>Connections</span>
 							</div>
 						}
 						>
+							<Table 
+							aria-label="Example table with client side pagination"
+							bottomContent={
+								<div className="flex w-full justify-center">
+								<Pagination
+									isCompact
+									showControls
+									showShadow
+									color="secondary"
+									page={pageLogin}
+									total={pagesLogin}
+									onChange={(pageLogin) => setPageLogin(pageLogin)}
+								/>
+								</div>
+							}
+							classNames={{
+								wrapper: "min-h-[222px]",
+							}}
+							>
+							<TableHeader>
+								<TableColumn key="ip">ip</TableColumn>
+								<TableColumn key="date">Date</TableColumn>
+							</TableHeader>
+							<TableBody items={itemsLogin}>
+								{(item) => (
+								<TableRow key={item.ip}>
+									{(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+								</TableRow>
+								)}
+							</TableBody>
+							</Table>
+						</Tab>
+						<Tab
+						key="DEPOSIT"
+						title={
+							<div className="flex items-center space-x-2">
+							<FaSeedling/>
+							<span>Deposits</span>
+							</div>
+						}
+						>
+							<Table 
+							aria-label="Example table with client side pagination"
+							bottomContent={
+								<div className="flex w-full justify-center">
+								<Pagination
+									isCompact
+									showControls
+									showShadow
+									color="secondary"
+									page={pageDeposit}
+									total={pagesDeposit}
+									onChange={(pageDeposit) => setPageDeposit(page)}
+								/>
+								</div>
+							}
+							classNames={{
+								wrapper: "min-h-[222px]",
+							}}
+							>
+							<TableHeader>
+								<TableColumn key="amount">Amount</TableColumn>
+								<TableColumn key="currency">Currency</TableColumn>
+								<TableColumn key="explorer">View</TableColumn>
+							</TableHeader>
+							<TableBody items={items}>
+								{(item) => (
+								<TableRow key={item.user}>
+									{(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+								</TableRow>
+								)}
+							</TableBody>
+							</Table>
 							
 						</Tab>
 					</Tabs>
