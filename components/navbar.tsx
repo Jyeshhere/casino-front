@@ -17,6 +17,7 @@ import { Input } from "@nextui-org/input";
 import { FaUserAstronaut } from "react-icons/fa";
 import { HiOutlineLogin } from "react-icons/hi";
 import { BiLogOutCircle } from "react-icons/bi";
+import { HiWallet } from "react-icons/hi2";
 import { RiAccountCircleLine } from "react-icons/ri";
 import { VscSettings } from "react-icons/vsc";
 import { SlWallet } from "react-icons/sl";
@@ -137,7 +138,6 @@ export const Navbar = () => {
 
 	// --------------------- START SOCKET -------------------------
 	socket.on('balances', (data) => {
-		console.log(data);
 		const emailHash = blake.blake2bHex(email);
 		if (data.email) {
 		  if (data.email === emailHash) {
@@ -179,7 +179,7 @@ export const Navbar = () => {
 				<NavbarContent className="basis-1/5 sm:basis-full" justify="start">
 					<NavbarBrand as="li" className="gap-3 max-w-fit">
 						<NextLink className="flex justify-start items-center gap-1 hidden sm:flex gap-2" href="/">
-							<Image src="/logo.png" alt="Logo" width={'30px'}/>
+							<Image src="/logo.png" alt="Logo" width={'30px'} radius='none'/>
 							<p className="font-bold text-inherit">NanBet</p>
 						</NextLink>
 					</NavbarBrand>
@@ -284,8 +284,16 @@ export const Navbar = () => {
 									key="new"
 									startContent={<RiAccountCircleLine className={iconClasses} />}
 									description="View your information"
+									href='/account'
 									>
 									Account
+									</DropdownItem>
+									<DropdownItem
+									key="copy"
+									startContent={<HiWallet className={iconClasses} />}
+									description="Your Wallet"
+									>
+									Wallet
 									</DropdownItem>
 									<DropdownItem
 									key="copy"
@@ -299,7 +307,7 @@ export const Navbar = () => {
 									className="text-danger"
 									color="danger"
 									startContent={<BiLogOutCircle className={iconClasses} />}
-									description="You are already leaving 🥲"
+									description="You are already leaving 😭"
 									onClick={handleLogout}
 									>
 									Logout
