@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { title } from "@/components/primitives";
 import {Pagination, User, Chip, Tooltip, ChipProps, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Input, Tabs, Tab, Avatar, Card, CardHeader, CardBody, CardFooter, Image, Link, Divider} from "@nextui-org/react";
 import axios from 'axios';
@@ -16,6 +16,8 @@ import TimeAgo from 'javascript-time-ago'
 import { CiCircleCheck } from "react-icons/ci";
 import { GrCloudComputer } from "react-icons/gr";
 import ReactTimeAgo from 'react-time-ago'
+import { FaHouseChimneyUser } from "react-icons/fa6";
+import { RiLuggageDepositLine } from "react-icons/ri";
 
 import en from 'javascript-time-ago/locale/en.json'
 TimeAgo.addDefaultLocale(en)
@@ -49,19 +51,20 @@ export default function BlogPage() {
 	const [loginHistoryData, setLoginHistoryData] = useState<historysData[]>([]);
 	const [depositData, setDepositData] = useState<historysData[]>([]);
 
-	const statusColorMap: Record<string, ChipProps["color"]>  = {
-		win: "success",
-		lose: "danger",
-		egal: "warning",
-	  };
+	
 	type User = any
-	const renderCell = React.useCallback((user: User, columnKey: React.Key) => {
+	const renderCell = useCallback((user: User, columnKey: React.Key) => {
+		const statusColorMap: Record<string, ChipProps["color"]>  = {
+			win: "success",
+			lose: "danger",
+			egal: "warning",
+		  };
 		const cellValue = user[columnKey as keyof User];
 	
 		switch (columnKey) {
 		  case "user":
 			return (
-				<Image src={`https://robohash.org/${user.user}?set=set4`} radius='none' width="40px"/>
+				<Image src={`https://robohash.org/${user.user}?set=set4`} radius='none' width="40px" alt='User Avatar'/>
 			);
 		  case "role":
 			return (
@@ -95,6 +98,19 @@ export default function BlogPage() {
 			} else {
 				return user.currency;
 			}
+			case "ticket":
+			const currencyOptionTicket = options.find((option) => option.value === user.ticket.toLowerCase());
+			if (currencyOptionTicket) {
+			return (
+				<Image
+                    src={currencyOptionTicket.logo}
+                    alt={currencyOptionTicket.label}
+                	style={{ width: '24px', marginRight: '8px' }}
+                />
+			);
+			} else {
+				return user.ticket;
+			}
 			case "actions":
 				return (
 				  <div className="relative flex items-center gap-2">
@@ -120,15 +136,16 @@ export default function BlogPage() {
 					<ReactTimeAgo date={user.date}/>
 				);
 			case "explorer":
+				console.log(`44444: ${JSON.stringify(user)}`);
 				const url = {xno: "https://www.nanolooker.com/block/", ban: "https://creeper.banano.cc/hash/", xdg: "https://explorer.dogenano.io/block/", ana: "https://ananault.lightcord.org/transaction/"}
 				
 				return (
-					<Link href={`${url[user.currency]}${user.hashTransac}`}>Here</Link>
+					<Link href={`${url[user.ticket.toLowerCase() as keyof typeof url]}${user.hashTransac}`}>Here</Link>
 				);
 		  default:
 			return cellValue;
 		}
-	  }, [statusColorMap]);
+	  }, []);
 
 	const [page, setPage] = React.useState(1);
 	const [pageLogin, setPageLogin] = React.useState(1);
@@ -137,7 +154,7 @@ export default function BlogPage() {
 
 	const pages = Math.ceil(historyData.length / rowsPerPage);
 	const pagesLogin = Math.ceil(loginHistoryData.length / rowsPerPage);
-	const pagesDeposit = Math.ceil(loginHistoryData.length / rowsPerPage);
+	const pagesDeposit = Math.ceil(depositData.length / rowsPerPage);
 
 	const items = React.useMemo(() => {
 		const start = (page - 1) * rowsPerPage;
@@ -180,7 +197,7 @@ export default function BlogPage() {
 		.catch(error => {
 		  console.error('Error fetching email:', error);
 		});
-	  }, []);
+	  }, [cookies.token]);
 
 	useEffect(() => {
 		axios.get(`${siteConfig.apiUrl}/user/latest_seed`, {
@@ -196,7 +213,7 @@ export default function BlogPage() {
 		.catch(error => {
 		  console.error('Error fetching email:', error);
 		});
-	  }, [seedHash]);
+	  }, [seedHash, cookies.token]);
 
 	const newSeed = async () => {
 		axios.get(`${siteConfig.apiUrl}/user/new_seed`, {
@@ -271,7 +288,7 @@ export default function BlogPage() {
 		  .catch(error => {
 			console.error('Error fetching history:', error);
 		  });
-	  }, []);
+	  }, [cookies.token, isAuthenticated]);
 
 	useEffect(() => {
 		// Récupérer les données de l'historique de connexion
@@ -290,7 +307,7 @@ export default function BlogPage() {
 			.catch(error => {
 			  console.error('Error fetching login history:', error);
 			});
-	}, []);
+	}, [cookies.token]);
 
 	useEffect(() => {
 		axios.get(`${siteConfig.apiUrl}/user/actual_seed`, {
@@ -306,7 +323,7 @@ export default function BlogPage() {
 		.catch(error => {
 		  console.error('Error fetching email:', error);
 		})
-	  }, []);
+	  }, [cookies.token]);
 
 	return (
 		<>
@@ -488,7 +505,7 @@ export default function BlogPage() {
 						key="SEED"
 						title={
 							<div className="flex items-center space-x-2">
-							<FaSeedling/>
+							<FaHouseChimneyUser/>
 							<span>Connections</span>
 							</div>
 						}
@@ -529,7 +546,7 @@ export default function BlogPage() {
 						key="DEPOSIT"
 						title={
 							<div className="flex items-center space-x-2">
-							<FaSeedling/>
+							<RiLuggageDepositLine/>
 							<span>Deposits</span>
 							</div>
 						}
@@ -555,12 +572,12 @@ export default function BlogPage() {
 							>
 							<TableHeader>
 								<TableColumn key="amount">Amount</TableColumn>
-								<TableColumn key="currency">Currency</TableColumn>
+								<TableColumn key="ticket">Currency</TableColumn>
 								<TableColumn key="explorer">View</TableColumn>
 							</TableHeader>
-							<TableBody items={items}>
+							<TableBody items={itemsDeposit}>
 								{(item) => (
-								<TableRow key={item.user}>
+								<TableRow key={item.amount}>
 									{(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
 								</TableRow>
 								)}

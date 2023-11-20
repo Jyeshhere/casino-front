@@ -1,6 +1,6 @@
 'use client'; 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { title } from "@/components/primitives";
 import {User, Chip, Tooltip, ChipProps, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagination, getKeyValue, Tabs, Tab, Card, CardHeader, CardBody, CardFooter, Divider, Link, Image, Button as NextButton, Snippet, Avatar as NextAvatar} from "@nextui-org/react";
 import { InputNumber, Button, message, Spin, Result, Radio, Tag, Popover, Avatar, Space } from 'antd';
@@ -37,7 +37,7 @@ export default function PricingPage() {
 	const [maxAmount, setMaxAmount] = useState<number>(0);
 	
 	const [balanceData, setBalanceData] = useState(null);
-	const [theLogo, setTheLogo] = useState<string | null>('null');
+	const [theLogo, setTheLogo] = useState<string | null>(null);
 
 	interface LatestBet {
 		// Définissez ici les propriétés de votre objet LatestBet
@@ -50,20 +50,20 @@ export default function PricingPage() {
 	  
 	const [latestBets, setLatestBets] = useState<LatestBet[]>([]);
 
-	const statusColorMap: Record<string, ChipProps["color"]>  = {
-		win: "success",
-		lose: "danger",
-		egal: "warning",
-	  };
 
 	type User = any
-	const renderCell = React.useCallback((user: User, columnKey: React.Key) => {
+	const renderCell = useCallback((user: User, columnKey: React.Key) => {
+		const statusColorMap: Record<string, ChipProps["color"]>  = {
+			win: "success",
+			lose: "danger",
+			egal: "warning",
+		  };
 		const cellValue = user[columnKey as keyof User];
 	
 		switch (columnKey) {
 		  case "user":
 			return (
-				<Image src={`https://robohash.org/${user.user}?set=set4`} radius='none' width="40px"/>
+				<Image src={`https://robohash.org/${user.user}?set=set4`} radius='none' width="40px" alt='User Avatar'/>
 			);
 		  case "role":
 			return (
@@ -120,7 +120,7 @@ export default function PricingPage() {
 		  default:
 			return cellValue;
 		}
-	  }, [statusColorMap]);
+	  }, []);
 
 	const [page, setPage] = React.useState(1);
   	const rowsPerPage = 10;
@@ -142,16 +142,7 @@ export default function PricingPage() {
 	const emojisWin: string[] = ['🎉', '🏆', '🥇', '🌟'];
 	const emojisLose: string[] = ['😭', '💔', '😢', '🙁'];
 	const emojisEqual: string[] = ['💁', '🤝', '🙆', '🤷'];
-
-	const fetchLatestBets = async () => {
-		try {
-		  const response = await axios.get(`${siteConfig.apiUrl}/history/pfc`);
-		  const sortedBets = sortLatestBets(response.data);
-		  setLatestBets(sortedBets);
-		} catch (error) {
-		  console.error('Error fetching latest bets:', error);
-		}
-	  };	  
+	  
 	
 	  socket.on('pfchistory', (data) => {
 		addNewEntryToLatestBets(data);
@@ -169,6 +160,15 @@ export default function PricingPage() {
 	  };
 	
 	  useEffect(() => {
+		const fetchLatestBets = async () => {
+			try {
+			  const response = await axios.get(`${siteConfig.apiUrl}/history/pfc`);
+			  const sortedBets = sortLatestBets(response.data);
+			  setLatestBets(sortedBets);
+			} catch (error) {
+			  console.error('Error fetching latest bets:', error);
+			}
+		  };	
 		fetchLatestBets();
 	  }, []);
 
@@ -192,19 +192,6 @@ export default function PricingPage() {
 		}
 	  };
 
-	const updateBalances = async () => {
-		try {
-		  const response = await axios.get(`${siteConfig.apiUrl}/user/balances`, {
-			headers: {
-			  auth: cookies.token,
-			},
-		  });
-		  setBalanceData(response.data);
-	
-		} catch (error) {
-		  console.error('Error fetching balance:', error);
-		}
-	};
 
 	const handlePlay = () => {
 		if (amount === null) {
@@ -246,7 +233,19 @@ export default function PricingPage() {
 			}
 	
 			//message.success('Jeu terminé. Résultat : ' + getResultText(response.data));
-	
+			const updateBalances = async () => {
+				try {
+				  const response = await axios.get(`${siteConfig.apiUrl}/user/balances`, {
+					headers: {
+					  auth: cookies.token,
+					},
+				  });
+				  setBalanceData(response.data);
+			
+				} catch (error) {
+				  console.error('Error fetching balance:', error);
+				}
+			};
 			// Mettez à jour les soldes après avoir reçu le résultat du pari
 			updateBalances();
 		  })
@@ -314,8 +313,21 @@ export default function PricingPage() {
 	  }, [selectedOption, balanceData, cookies.currency, cookies.token]);
 
 	useEffect(() => {
+		const updateBalances = async () => {
+			try {
+			  const response = await axios.get(`${siteConfig.apiUrl}/user/balances`, {
+				headers: {
+				  auth: cookies.token,
+				},
+			  });
+			  setBalanceData(response.data);
+		
+			} catch (error) {
+			  console.error('Error fetching balance:', error);
+			}
+		};
 		updateBalances();
-	}, []);
+	}, [cookies.token]);
 	return (
 		<>
 		
@@ -404,7 +416,7 @@ export default function PricingPage() {
 								}}
 								placeholder="Amount"
 								inputMode="numeric"
-								addonBefore={<Avatar src={theLogo} style={{ height: '80%' }} />}
+								addonBefore={<Avatar src={theLogo === null ? "https://xno.nano.org/images/xno-badge-blue.svg" : theLogo} style={{ height: '80%' }} />}
 								onChange={(value: number | string | null) => {
 									if (!isNaN(Number(value))) {
 										setAmount(Number(value));
