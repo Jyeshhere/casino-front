@@ -470,21 +470,25 @@ export default function BlogPage() {
 							<Table 
 							aria-label="Example table with client side pagination"
 							bottomContent={
-								<div className="flex w-full justify-center">
-								<Pagination
-									isCompact
-									showControls
-									showShadow
-									color="secondary"
-									page={page}
-									total={pages}
-									onChange={(page) => setPage(page)}
-								/>
-								</div>
+								pages > 0 ? (
+								  <div className="flex w-full justify-center">
+									<Pagination
+									  isCompact
+									  showControls
+									  showShadow
+									  color="primary"
+									  page={page}
+									  total={pages}
+									  onChange={(page) => setPage(page)}
+									  size='sm'
+									/>
+								  </div>
+								) : null
 							}
 							classNames={{
-								wrapper: "min-h-[222px]",
+								wrapper: "min-h-[220px]",
 							}}
+
 							>
 							<TableHeader>
 								<TableColumn key="game">Game</TableColumn>
@@ -522,6 +526,7 @@ export default function BlogPage() {
 									page={pageLogin}
 									total={pagesLogin}
 									onChange={(pageLogin) => setPageLogin(pageLogin)}
+									size='sm'
 								/>
 								</div>
 							}
@@ -563,6 +568,7 @@ export default function BlogPage() {
 									page={pageDeposit}
 									total={pagesDeposit}
 									onChange={(pageDeposit) => setPageDeposit(page)}
+									size='sm'
 								/>
 								</div>
 							}

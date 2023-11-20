@@ -10,10 +10,11 @@ import { FaUserAstronaut, FaDice } from "react-icons/fa";
 import { HiOutlineLogin } from "react-icons/hi";
 import { siteConfig } from "@/config/site";
 import axios from 'axios';
-import { generateSeed } from "@/modules/utils"
+import { generateSeed } from "@/modules/utils";
+import blake from 'blakejs';
 import { CopyOutlined, InfoCircleOutlined, SmileOutlined, FrownOutlined, MehOutlined, EuroOutlined, BankOutlined } from '@ant-design/icons';
-import "../../styles/emojis.css";
-import "../../styles/general.css";
+import "@/styles/emojis.css";
+import "@/styles/general.css";
 import io from 'socket.io-client';
 const socket = io(`${siteConfig.apiUrl}`);
 const options = [
@@ -23,6 +24,7 @@ const options = [
 	{ value: "xdg", label: 'XDG', logo: 'https://dogenano.io/static/media/XDG.00462477.png' },
   ];
 
+  
 export default function PricingPage() {
 	const { theme, setTheme } = useTheme();
 	const [cookies, setCookie, removeCookie] = useCookies(['token', 'currency']);
@@ -38,6 +40,7 @@ export default function PricingPage() {
 	
 	const [balanceData, setBalanceData] = useState(null);
 	const [theLogo, setTheLogo] = useState<string | null>(null);
+	const [email, setEmail] = useState('');
 
 	interface LatestBet {
 		// Définissez ici les propriétés de votre objet LatestBet
@@ -50,6 +53,35 @@ export default function PricingPage() {
 	  
 	const [latestBets, setLatestBets] = useState<LatestBet[]>([]);
 
+	socket.on('balances', (data) => {
+		const emailHash = blake.blake2bHex(email);
+		if (data.email) {
+		  if (data.email === emailHash) {
+			const withoutEmail = { ...data };
+			delete withoutEmail.email;
+			setBalanceData(withoutEmail);
+		  }
+		} else {
+		  setBalanceData(data);
+		}
+	});
+
+	// Requête axios pour récupérer des informations du user...
+	useEffect(() => {
+		axios.get(`${siteConfig.apiUrl}/user/email`, {
+			headers: {
+			  auth: cookies.token
+			}
+		  })
+		  .then(response => {
+			if (response.data && response.data.email) {
+			  setEmail(response.data.email);
+			}
+		  })
+		  .catch(error => {
+			console.error('Error fetching email:', error);
+		  })
+	}, [isAuthenticated, cookies.token]);
 
 	type User = any
 	const renderCell = useCallback((user: User, columnKey: React.Key) => {
@@ -209,7 +241,7 @@ export default function PricingPage() {
 		const data = {
 		  signe: selectedSign,
 		  amount: amount,
-		  currency: cookies.currency,
+		  currency: cookies.currency ? cookies.currency : "xno",
 		  gameSeed: Seed
 		};
 	
@@ -289,7 +321,6 @@ export default function PricingPage() {
 		if (balanceData) {
 		  const selectedCrypto = options.find((option) => option.value === cookies.currency);
 		  
-		  if (selectedCrypto) {
 			axios.get(`${siteConfig.apiUrl}/infos/maxBet`, {
 			  headers: {
 				auth: cookies.token,
@@ -297,10 +328,10 @@ export default function PricingPage() {
 			})
 			  .then(response => {
 				if (response.data) {
-				  if (balanceData[selectedCrypto.value] >= response.data[selectedCrypto.value]) {
-					setMaxAmount(response.data[selectedCrypto.value]);
+				  if (balanceData[selectedCrypto ? selectedCrypto.value : "xno"] >= response.data[selectedCrypto ? selectedCrypto.value : "XNO"]) {
+					setMaxAmount(response.data[selectedCrypto ? selectedCrypto.value : "xno"]);
 				  } else {
-					setMaxAmount(balanceData[selectedCrypto.value]);
+					setMaxAmount(balanceData[selectedCrypto ? selectedCrypto.value : "xno"]);
 				  }
 				}
 			  })
@@ -308,7 +339,7 @@ export default function PricingPage() {
 				console.error('Error fetching login history:', error);
 			  });
 			
-		  }
+		  
 		}
 	  }, [selectedOption, balanceData, cookies.currency, cookies.token]);
 
@@ -327,7 +358,7 @@ export default function PricingPage() {
 			}
 		};
 		updateBalances();
-	}, [cookies.token]);
+	}, [cookies.token, cookies.currency]);
 	return (
 		<>
 		

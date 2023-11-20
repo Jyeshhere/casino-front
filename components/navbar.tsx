@@ -71,7 +71,7 @@ export const Navbar = () => {
 	const [deposit, setDeposit] = useState<{ [key: string]: string }>({});
 	const [latestDeposit, setLatestDeposit] = useState('');
 	const [online, setOnline] = useState(1);
-	
+	const [actuelCurrency, setActuelCurrency] = useState('XNO');
 
 	// Liste de toutes les cryptos prisent en charge, c'est utilisé pour récupérer les logo à partir du nom de la crypto
 	const options = [
@@ -101,6 +101,12 @@ export const Navbar = () => {
 			console.error('Error fetching email:', error);
 		  })
 	}, [isAuthenticated, cookies.token]);
+
+	useEffect(() => {
+		if (cookies.currency) {
+			setActuelCurrency(cookies.currency);
+		}
+	}, [cookies.currency, cookies.token]);
 
 	// Envoie d'une demande d'information sur la balance via le socket.io
 	useEffect(() => {
@@ -229,7 +235,7 @@ export const Navbar = () => {
 							description={
 							<>
 								<div style={{ display: 'flex', alignItems: 'center' }}>
-								  <span>{miniDeposit[cookies?.currency?.toUpperCase()]}</span>
+								  <span>{miniDeposit[actuelCurrency.toUpperCase()]}</span>
 								  <CopyToClipboard
 									text={deposit[cookies?.currency?.toUpperCase() || 'XNO']}
 									onCopy={() => info('Adresse copiée dans le presse-papiers !')}
