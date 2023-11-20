@@ -214,19 +214,22 @@ export const Navbar = () => {
 							
 						>
 						<Select
-							defaultValue={cookies.currency || "xno"}
+							value={actuelCurrency}
 							style={{ width: 120 }}
 							options={options.map((option) => ({
-							value: option.value,
-							label: (
+								value: option.value,
+								label: (
 								<span>
-								<AntAvatar src={option.image} size="small" />
-								<Text strong>{balanceData ? ` | ${balanceData[option.value]}` : 'Chargement...'}</Text>
+									<AntAvatar src={option.image} size="small" />
+									<Text strong>{balanceData ? ` | ${balanceData[option.value]}` : 'Chargement...'}</Text>
 								</span>
-							),
+								),
 							}))}
-							onChange={(value: any) => setCookie('currency', value, { path: '/' })}
-						/>
+							onChange={(value: any) => {
+								setActuelCurrency(value);
+								setCookie('currency', value, { path: '/' });
+							}}
+							/>
 						</ConfigProvider>
 
 						<Popconfirm

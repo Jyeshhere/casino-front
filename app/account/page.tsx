@@ -338,7 +338,7 @@ export default function BlogPage() {
 					/>
 					<div className="flex flex-col">
 					<p className="text-md">
-					<Chip color="warning" variant="dot">
+					<Chip color="success" variant="dot">
 							{email}
 						</Chip>
 					</p>
