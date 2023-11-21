@@ -416,7 +416,7 @@ export default function PricingPage() {
       </>
 		) : (
 		<>
-			<Card className="max-w-[400px]">
+			<Card className="max-w-[389px]">
 						<CardHeader className="flex gap-3">
 							<div className="flex flex-col">
 								<p className="text-md">Jeu Pierre-Papier-Ciseaux</p>
@@ -439,30 +439,33 @@ export default function PricingPage() {
 								<Radio.Button value={3} style={{ backgroundColor: theme === "light" ? "#FFFFFF" : "#3B3737" }}><p style={{ color: theme === "light" ? "black" : "#FFFFFF" }}>Scissors <Avatar src="https://symbl-world.akamaized.net/i/webp/c4/aa8b2a5d6d7304241d56de9f82e3d9.webp" size={18} /></p></Radio.Button>
 							</Radio.Group>
 							<InputNumber
-								style={{
-									backgroundColor: theme === "light" ? "#FFFFFF" : "#3B3737",
-									borderColor: theme === "light" ? "#FFFFFF" : "#3B3737",
-									color: theme === "light" ? "black" : "#FFFFFF",
-									borderRadius: '5px'
-								}}
-								placeholder="Amount"
-								inputMode="numeric"
-								addonBefore={<Avatar src={theLogo === null ? "https://xno.nano.org/images/xno-badge-blue.svg" : theLogo} style={{ height: '80%' }} />}
-								onChange={(value: number | string | null) => {
-									if (!isNaN(Number(value))) {
-										setAmount(Number(value));
-									} else {
-										console.error("La valeur n'est pas un nombre valide");
-									}
-								} }
-								min={0}
-								value={amount}
-								max={maxAmount}
-								addonAfter={<Space>
-									<Button size='small' onClick={handleDivideByTwo}><p style={{ color: theme === "light" ? "black" : "#FFFFFF" }}>÷2</p></Button>
-									<Button size='small' onClick={handleMultiplyByTwo}><p style={{ color: theme === "light" ? "black" : "#FFFFFF" }}>×2</p></Button>
-									<Button size='small' onClick={handleSetToMax}><p style={{ color: theme === "light" ? "black" : "#FFFFFF" }}>Max</p></Button>
-								</Space>} />
+							style={{
+								backgroundColor: theme === "light" ? "#FFFFFF" : "#3B3737",
+								borderColor: theme === "light" ? "#FFFFFF" : "#3B3737",
+								color: theme === "light" ? "black" : "#FFFFFF",
+								borderRadius: '5px',
+								width: '90%',
+							}}
+							placeholder="Amount"
+							inputMode="numeric"
+							addonBefore={<Avatar src={theLogo === null ? "https://xno.nano.org/images/xno-badge-blue.svg" : theLogo} style={{ height: '80%' }} />}
+							onChange={(value: number | string | null) => {
+								if (!isNaN(Number(value))) {
+								setAmount(Number(value));
+								} else {
+								console.error("La valeur n'est pas un nombre valide");
+								}
+							}}
+							min={0}
+							value={amount}
+							max={maxAmount}
+							
+							addonAfter={<Space>
+								<Button size='small' onClick={handleDivideByTwo}><p style={{ color: theme === "light" ? "black" : "#FFFFFF" }}>÷2</p></Button>
+								<Button size='small' onClick={handleMultiplyByTwo}><p style={{ color: theme === "light" ? "black" : "#FFFFFF" }}>×2</p></Button>
+								<Button size='small' onClick={handleSetToMax}><p style={{ color: theme === "light" ? "black" : "#FFFFFF" }}>Max</p></Button>
+							</Space>} />
+								
 						</CardBody>
 						<Divider />
 						<CardFooter style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>

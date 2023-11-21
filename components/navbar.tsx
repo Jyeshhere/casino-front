@@ -301,6 +301,7 @@ export const Navbar = () => {
 									key="copy"
 									startContent={<HiWallet className={iconClasses} />}
 									description="Your Wallet"
+									href='/wallet'
 									>
 									Wallet
 									</DropdownItem>
